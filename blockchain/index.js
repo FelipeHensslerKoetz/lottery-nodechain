@@ -6,10 +6,23 @@ class Blockchain {
   }
 
   addBlock(data) {
-    const block = Block.mineBlock(this.chain[this.chain.length - 1], data);
-    this.chain.push(block);
+    if (this.lotteryIsOpenForRegistrations()) {
+      const block = Block.mineBlock(this.chain[this.chain.length - 1], data, false);
+      this.chain.push(block);
+      console.log(`New block added: ${block.toString()}`);
+    }
 
-    return block;
+    if (!this.lotteryIsOpenForRegistrations()) {
+      console.log("Lottery is closed for registrations");
+      console.log("Picking a winner...");
+      const winner = this.pickWinner(); 
+      console.log("Winner is: " + winner); 
+
+      // Reset lottery and add winner into data field of new block
+      const newLotteryBlock = Block.mineBlock(this.chain[this.chain.length - 1], winner, true);
+      this.chain.push(newLotteryBlock);
+      console.log(`New block added: ${newLotteryBlock.toString()}`);
+    }
   }
 
   isValidChain(chain) {
@@ -39,6 +52,18 @@ class Blockchain {
 
     console.log("Replacing the current chain with new chain");
     this.chain = newChain;
+  }
+
+  lotteryIsOpenForRegistrations() {
+    return this.chain[this.chain.length - 1].lottery_players.length < this.chain[this.chain.length - 1].lottery_minimum_players;
+  }
+
+  pickWinner() {
+    if (!this.lotteryIsOpenForRegistrations()) {
+      const lottery_players = this.chain[this.chain.length - 1].lottery_players;
+      const winner = lottery_players[Math.floor(Math.random() * lottery_players.length)];
+      return winner;
+    }
   }
 }
 

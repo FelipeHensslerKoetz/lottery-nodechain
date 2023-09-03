@@ -13,9 +13,9 @@ app.get('/blocks', (req, res) => {
   res.json(blockchain.chain);
 });
 
+// Register an lottery player
 app.post('/mine', (req, res) => {
-  const block = blockchain.addBlock(req.body.data);
-  console.log(`New block added: ${block.toString()}`);
+  blockchain.addBlock(req.body.data);
   p2pserver.syncChain();
   res.redirect('/blocks');
 });
